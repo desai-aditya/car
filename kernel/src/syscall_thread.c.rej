@@ -1,0 +1,114 @@
+diff a/kernel/src/syscall_thread.c b/kernel/src/syscall_thread.c	(rejected hunks)
+@@ -58,6 +58,7 @@ uint32_t global_system_time = 0;
+ uint32_t prio_taken[16] = {0};
+ 
+ void default_idle();
++void tcb_init(int index, void* fn, void* vargp, uint32_t priority, uint32_t C, uint32_t T);
+ 
+ void systick_c_handler() {
+     global_system_time++; // increment global system time counter
+@@ -217,23 +215,12 @@ int sys_thread_init(uint32_t max_threads, uint32_t stack_size, void* idle_fn, mp
+     TCB[15].static_priority = __UINT8_MAX__;
+     TCB[15].time_since_scheduler_start = 0;
+     
+-    /*for(uint32_t i = 0; i <= max_threads; i++) {
+-        printk("For i = %u TCB kernel_start is %p kernel_end is %p user_start is %p user end is %p\n", i, TCB[i].kernel_stack_start, TCB[i].kernel_stack_end, TCB[i].user_stack_start, TCB[i].user_stack_end);
+-    }*/
+     restore_interrupt_state(interrupt_status);
+     return 0;
+ }
+ 
+ int sys_thread_create(void* fn, uint32_t priority, uint32_t C, uint32_t T, void* vargp) {
+     
+-    // breakpoint();
+-
+-    // loop through the pool and see which is NULL
+-    // if(prio_taken[priority]) {
+-    //     printk("Priority taken for %lu!\n", priority);
+-    //     return -1;
+-    // }
+-
+     if(priority > 14) {
+         printk("Prio cannot be greater than 15\n");
+         return -1;
+@@ -249,46 +236,46 @@ int sys_thread_create(void* fn, uint32_t priority, uint32_t C, uint32_t T, void*
+     if(UB_test_RMS(totalThreads, C, T) == -1) {
+         return -1;
+     } // here we will pass the current C and T
+-
+-    TCB[totalThreads].msp = (msp_stack_frame_t*)TCB[totalThreads].kernel_stack_start;
+-    TCB[totalThreads].msp->lr = (void*)LR_RETURN_TO_USER_PSP;
+-    TCB[totalThreads].prio = priority;
+-    TCB[totalThreads].state = RUNNABLE;
+-    TCB[totalThreads].msp->psp = (interrupt_stack_frame*)TCB[totalThreads].user_stack_start;
+-    TCB[totalThreads].msp->psp->r0 = (uint32_t)(vargp);
+-    printk("Argument in sys thread create is %s\n",TCB[totalThreads].msp->psp->r0);
+-    // breakpoint();
+-    // printk("Arg is %s\n",(char*)TCB[totalThreads].msp->psp->r0);
+-    TCB[totalThreads].msp->psp->pc = fn;
+-    // TCB[totalThreads].msp->psp->lr = TCB[totalThreads].fn;
+-    TCB[totalThreads].msp->psp->xPSR = XPSR_INIT;
+-    // setting everything to 0 so that all registers are clear when first init happens
+-    TCB[totalThreads].msp->psp->r1 = 0;
+-    TCB[totalThreads].msp->psp->r2 = 0;
+-    TCB[totalThreads].msp->psp->r3 = 0;
+-    TCB[totalThreads].msp->psp->r12 = 0;
+-    TCB[totalThreads].msp->r4 = 0;
+-    TCB[totalThreads].msp->r5 = 0;
+-    TCB[totalThreads].msp->r6 = 0;
+-    TCB[totalThreads].msp->r7 = 0;
+-    TCB[totalThreads].msp->r8 = 0;
+-    TCB[totalThreads].msp->r9 = 0;
+-    TCB[totalThreads].msp->r10 = 0;
+-    TCB[totalThreads].msp->r11 = 0;
+-    TCB[totalThreads].running_time = 0;
+-    TCB[totalThreads].C = C; // assign C
+-    TCB[totalThreads].T = T; // assign T
+-    TCB[totalThreads].svc_status = 0;
+-    TCB[totalThreads].execution_time = 0;
+-    TCB[totalThreads].static_priority = priority;
+-    TCB[totalThreads].time_since_scheduler_start = 0;
+-    // breakpoint();
++    
++    tcb_init(totalThreads, fn, vargp, priority, C, T);
+     prio_taken[priority] = 1;
+ 
+     totalThreads++;
+     return 0;
+ }
+ 
++void tcb_init(int index, void* fn, void* vargp, uint32_t priority, uint32_t C, uint32_t T) {
++    TCB[index].msp = (msp_stack_frame_t*)TCB[index].kernel_stack_start;
++    TCB[index].msp->lr = (void*)LR_RETURN_TO_USER_PSP;
++    TCB[index].prio = priority;
++    TCB[index].state = RUNNABLE;
++    TCB[index].msp->psp = (interrupt_stack_frame*)TCB[index].user_stack_start;
++    TCB[index].msp->psp->r0 = (uint32_t)(vargp);
++    printk("Argument in sys thread create is %s\n",TCB[index].msp->psp->r0);
++    TCB[index].msp->psp->pc = fn;
++    TCB[index].msp->psp->xPSR = XPSR_INIT;
++    // setting everything to 0 so that all registers are clear when first init happens
++    TCB[index].msp->psp->r1 = 0;
++    TCB[index].msp->psp->r2 = 0;
++    TCB[index].msp->psp->r3 = 0;
++    TCB[index].msp->psp->r12 = 0;
++    TCB[index].msp->r4 = 0;
++    TCB[index].msp->r5 = 0;
++    TCB[index].msp->r6 = 0;
++    TCB[index].msp->r7 = 0;
++    TCB[index].msp->r8 = 0;
++    TCB[index].msp->r9 = 0;
++    TCB[index].msp->r10 = 0;
++    TCB[index].msp->r11 = 0;
++    TCB[index].running_time = 0;
++    TCB[index].C = C; // assign C
++    TCB[index].T = T; // assign T
++    TCB[index].svc_status = 0;
++    TCB[index].execution_time = 0;
++    TCB[index].static_priority = priority;
++    TCB[index].time_since_scheduler_start = 0;
++}
++
+ int sys_scheduler_start(uint32_t frequency) {
+     systick_start(frequency);
+     pend_pendsv();
