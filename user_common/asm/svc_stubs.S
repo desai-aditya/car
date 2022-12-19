@@ -190,3 +190,19 @@ _gettimeofday:
 .global _times
 _times:
   bkpt
+
+.global color_set
+color_set:
+  svc #50
+  bx lr
+
+
+.global send_radio_packet 
+send_radio_packet:
+  svc #51
+  bx lr
+
+.global recv_radio_packet 
+recv_radio_packet:
+  svc #52
+  bx lr

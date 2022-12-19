@@ -16,6 +16,7 @@
 #include<pix.h>
 #include<i2c.h>
 #include<timer.h>
+#include<radio.h>
 
 /** here we have the different regions from the linker script
  * 
@@ -112,6 +113,7 @@ int kernel_main() {
     
     
 
+    radio_init();
     // enter user mode main function after handshake 
     enter_user_mode();
     

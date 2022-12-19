@@ -214,12 +214,16 @@ void read_lux();
 void read_mic();
 void pix_set(int on);
 void led_glow(int on);
+void color_set(int r, int g, int b);
 
 void forward();
 void backward();
 void left();
 void right();
 void stop();
+
+void send_radio_packet(int data);
+int  recv_radio_packet(int* data,int timeout);
 
 #undef intrinsic
 

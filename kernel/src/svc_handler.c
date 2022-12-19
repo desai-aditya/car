@@ -17,6 +17,7 @@
 #include <syscall_thread.h>
 #include <syscall_mutex.h>
 #include<visualiser.h>
+#include<radio.h>
 
 void svc_c_handler(void* stk_ptr) {
     //breakpoint();
@@ -192,6 +193,18 @@ void svc_c_handler(void* stk_ptr) {
 
         case STOP_CAR:
             sys_stop_car();
+            break;
+        
+        case COLOR_SET:
+            pix_color_set(stack->r0, stack->r1, stack->r2);
+            break;
+        
+        case SEND_PKT:
+            sys_send_packet(stack->r0);
+            break;
+        
+        case RECV_PKT:
+            stack->r0 = sys_recv_packet((int32_t*)stack->r0,stack->r1);
             break;
 
         default:

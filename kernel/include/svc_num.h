@@ -73,4 +73,8 @@
 #define TURN_RIGHT 35
 #define STOP_CAR 36
 
+#define COLOR_SET 50 
+#define SEND_PKT 51
+#define RECV_PKT 52
+
 #endif /* _SVC_NUM_H_ */

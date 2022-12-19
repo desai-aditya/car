@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 #include<syscall_mutex.h>
+#include<mpu.h>
 
 /** @struct interrupt_stack_frame
  *  @brief stack frame upon interrupt/exception

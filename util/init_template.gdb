@@ -50,7 +50,6 @@ mon tpwr enable
 mon swdp_scan
 att 1
 mon rtt enable
-lay src
 load
 run
 
